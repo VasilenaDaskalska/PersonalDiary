@@ -2,42 +2,49 @@
 @using PersonalDiary.HttpRepositories.Contracts
 @using PersonalDiary.Business.Models
 @using Microsoft.AspNetCore.Components
+@using PersonalDiary.Client.Shared.Dialogs
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid>
-        <MudItem xs="12">
-            <MudPaper Class="pa-4">
-                <MudText Typo="Typo.h4" Class="mb-4">My Diary</MudText>
-                <MudButton Variant="Variant.Filled" 
-                          Color="Color.Primary" 
-                          StartIcon="@Icons.Material.Filled.Add"
-                          OnClick="OpenAddDialog">
-                    Add New Entry
-                </MudButton>
-            </MudPaper>
-        </MudItem>
-
         <MudItem xs="12" Class="mt-4">
             <MudPaper Class="pa-4">
-                <MudGrid>
-                    <MudItem xs="12" sm="4">
-                        <MudTextField @bind-Value="searchString" 
-                                    Placeholder="Search entries..." 
-                                    Adornment="Adornment.Start"
-                                    AdornmentIcon="@Icons.Material.Filled.Search"
-                                    IconSize="Size.Medium"
-                                    Class="mt-0"/>
+                <MudText Typo="Typo.h4" Class="mb-4">My Diary</MudText>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="OpenAddDialog">
+                    Add New Entry
+                </MudButton>
+                <MudGrid Class="mt-4">
+                    <!-- Search Field -->
+                    <MudItem xs="12" sm="4" Class="mt-4">
+                        <MudTextField Value="@searchString"
+                                      ValueChanged="@(async (string value) => { searchString = value; await InvokeAsync(FilterAndSortEntries); })"
+                                      Placeholder="Search entries..."
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      IconSize="Size.Medium"
+                                      Immediate="true" />
                     </MudItem>
-                    <MudItem xs="12" sm="4">
-                        <MudDateRangePicker @bind-DateRange="dateRange" 
-                                          Label="Date Range"
-                                          Class="mt-0"/>
+
+                    <!-- Date Range Picker -->
+                    <MudItem xs="12" sm="4" Class="mt-4">
+                        <MudDateRangePicker DateRange="@dateRange"
+                                            DateRangeChanged="@(async (DateRange range) => { dateRange = range; await InvokeAsync(FilterAndSortEntries); })"
+                                            Clearable="true"
+                                            PlaceholderStart="Start date"
+                                            PlaceholderEnd="End date"
+                                            Margin="Margin.Dense" />
                     </MudItem>
+
+                    <!-- Sort By Dropdown -->
                     <MudItem xs="12" sm="4">
-                        <MudSelect T="string" 
-                                 Label="Sort By" 
-                                 @bind-Value="sortBy"
-                                 Class="mt-0">
+                        <MudSelect T="string"
+                                   Value="@sortBy"
+                                   ValueChanged="@(async (string value) => { sortBy = value; await InvokeAsync(FilterAndSortEntries); })"
+                                   Label="Sort By"
+                                   Class="mt-0"
+                                   Immediate="true">
                             <MudSelectItem Value="@("date")">Date</MudSelectItem>
                             <MudSelectItem Value="@("title")">Title</MudSelectItem>
                         </MudSelect>
@@ -45,40 +52,38 @@
                 </MudGrid>
             </MudPaper>
         </MudItem>
-
         <MudItem xs="12" Class="mt-4">
             @if (diaryEntries == null)
             {
                 <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
             }
-            else if (!diaryEntries.Any())
+            else if (!filteredEntries.Any())
             {
                 <MudText>No diary entries found.</MudText>
             }
             else
             {
                 <MudGrid>
-                    @foreach (var entry in filteredEntries)
+                    @foreach (var entry in this.filteredEntries)
                     {
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCard>
+                            <MudCard Class="mud-card-clickable" @onclick="@(() => OpenViewDialog(entry))">
                                 <MudCardHeader>
                                     <CardHeaderContent>
                                         <MudText Typo="Typo.h6">@entry.Title</MudText>
                                         <MudText Typo="Typo.body2">@entry.CreationDate.ToShortDateString()</MudText>
                                     </CardHeaderContent>
                                 </MudCardHeader>
-                                <MudCardContent>
-                                    <MudText>@entry.Description</MudText>
-                                </MudCardContent>
                                 <MudCardActions>
                                     <MudButton Variant="Variant.Text" 
                                              Color="Color.Primary"
+                                             OnClick:stopPropagation="true"
                                              OnClick="@(() => OpenEditDialog(entry))">
                                         Edit
                                     </MudButton>
                                     <MudButton Variant="Variant.Text" 
                                              Color="Color.Error"
+                                             OnClick:stopPropagation="true"
                                              OnClick="@(() => DeleteEntry(entry.ID))">
                                         Delete
                                     </MudButton>
@@ -92,26 +97,3 @@
     </MudGrid>
 </MudContainer>
 
-<MudDialog @bind-IsVisible="dialogVisible" Options="dialogOptions">
-    <TitleContent>
-        <MudText Typo="Typo.h6">@(editingEntry == null ? "Add New Entry" : "Edit Entry")</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudTextField @bind-Value="currentEntry.Title" 
-                     Label="Title" 
-                     Required="true"
-                     Class="mt-3"/>
-        <MudTextField @bind-Value="currentEntry.Description" 
-                     Label="Content" 
-                     Required="true"
-                     Lines="3"
-                     Class="mt-3"/>
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="CloseDialog">Cancel</MudButton>
-        <MudButton Color="Color.Primary" 
-                  OnClick="SaveEntry">
-            Save
-        </MudButton>
-    </DialogActions>
-</MudDialog>

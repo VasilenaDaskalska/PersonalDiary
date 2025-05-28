@@ -16,9 +16,18 @@ namespace PersonalDiary.HttpRepositories
 
         public async Task<DiaryBiz> CreateAsync(DiaryBiz model)
         {
-            var response = await this.httpClient.PostAsJsonAsync("api/diary", model);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<DiaryBiz>();
+            try
+            {
+                var response = await this.httpClient.PostAsJsonAsync("api/diary", model);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<DiaryBiz>();
+            }
+            catch
+            (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
 
         public async Task<IEnumerable<DiaryBiz>> GetAllAsync()

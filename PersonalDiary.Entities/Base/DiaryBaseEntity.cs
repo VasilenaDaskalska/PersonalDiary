@@ -7,7 +7,7 @@ namespace PersonalDiary.Entities.Base
     public abstract class DiaryBaseEntity : BaseEntity, IDeletable, IAuditInfo
     {
         [Required(AllowEmptyStrings = false, ErrorMessage = "Title is required!")]
-        [StringLength(maximumLength: 50, MinimumLength = 5, ErrorMessage = "The title must be between 5 and 50 characters long!")]
+        [StringLength(maximumLength: 50, MinimumLength = 1, ErrorMessage = "The title must be between 5 and 50 characters long!")]
         public string Title { get; set; }
 
         [StringLength(500, ErrorMessage = "The description must be maximum 500 characters long!")]

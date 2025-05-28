@@ -39,7 +39,7 @@ public partial class Login
                 await this.LocalStorage.SetItemAsync("authToken", result.Token);
                 var userForSession = UserMapper.MapUserEntityFromUserBiz(result.User);
                 await this.UserState.SetUserAsync(userForSession);
-                this.NavigationManager.NavigateTo("/");
+                this.NavigationManager.NavigateTo("/diary");
             }
         }
         catch (Exception ex)

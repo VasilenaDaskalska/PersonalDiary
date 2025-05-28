@@ -7,13 +7,29 @@
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudText Typo="Typo.h5" Class="ml-3">My Diary</MudText>
         <MudSpacer />
+
+        @if (this.UserState.CurrentUser != null && this.UserState.CurrentUser.UserPermissions == PERMISSIONS.Admin)
+        {
+            <MudButton Variant="@Variant.Text" Color="@Color.Primary" OnClick="@this.GoToUsersPage">Users</MudButton>
+        }
+
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
     <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
+        @if (this.UserState.IsAuthenticated)
+        {
+            <NavMenu />
+        }
+        else
+        {
+            <MudNavMenu>
+                <MudNavLink Href="login" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
+                <MudNavLink Href="register" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
+            </MudNavMenu>
+        }
+
     </MudDrawer>
     <MudMainContent Class="pt-16 pa-4">
         @Body
@@ -26,78 +42,4 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
-
-@code {
-    private bool _drawerOpen = true;
-    private bool _isDarkMode = true;
-    private MudTheme? _theme = null;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        _theme = new()
-        {
-            PaletteLight = _lightPalette,
-            PaletteDark = _darkPalette,
-            LayoutProperties = new LayoutProperties()
-        };
-    }
-
-    private void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
-
-    private void DarkModeToggle()
-    {
-        _isDarkMode = !_isDarkMode;
-    }
-
-    private readonly PaletteLight _lightPalette = new()
-    {
-        Black = "#2D2A32", // A warm charcoal for high contrast
-        AppbarText = "#5C5470", // Muted plum
-        AppbarBackground = "rgba(255, 250, 245, 0.8)", // Soft parchment
-        DrawerBackground = "#FFFBF7", // Very light cream
-        GrayLight = "#EADDD3", // Subtle beige-gray
-        GrayLighter = "#F8F4EF", // Very light warm gray
-    };
-
-    private readonly PaletteDark _darkPalette = new()
-    {
-        Primary = "#A78BFA", // Soft lavender for highlights
-        Surface = "#2E2A36", // Deep muted purple
-        Background = "#1F1B24", // Very dark plum
-        BackgroundGray = "#26222C", // Slightly lighter for contrast
-        AppbarText = "#BFAEDC", // Muted light lavender
-        AppbarBackground = "rgba(31,27,36,0.8)",
-        DrawerBackground = "#1F1B24",
-        ActionDefault = "#BFAEDC",
-        ActionDisabled = "#66667A4D",
-        ActionDisabledBackground = "#55556A33",
-        TextPrimary = "#EDE6F3", // Soft white-purple
-        TextSecondary = "#C7BCD8", // Muted text
-        TextDisabled = "#FFFFFF33",
-        DrawerIcon = "#C7BCD8",
-        DrawerText = "#C7BCD8",
-        GrayLight = "#3B3745",
-        GrayLighter = "#2E2A36",
-        Info = "#81A9F4", // Calm sky blue
-        Success = "#7CD3A4", // Gentle green
-        Warning = "#FFCC70", // Warm amber
-        Error = "#FF6B81", // Soft rose red
-        LinesDefault = "#3A3644",
-        TableLines = "#3A3644",
-        Divider = "#2A2633",
-        OverlayLight = "#2E2A3680",
-    };
-
-    public string DarkLightModeButtonIcon => _isDarkMode switch
-    {
-        true => Icons.Material.Rounded.AutoMode,
-        false => Icons.Material.Outlined.DarkMode,
-    };
-}
-
 

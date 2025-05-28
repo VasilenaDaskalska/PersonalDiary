@@ -1,0 +1,36 @@
+﻿@using MudBlazor
+
+<MudDialog Style="width: 70%; height: 80%">
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="@success">
+            <MudTextField @bind-Value="@this.Entry.Title"
+                          Label="Title"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="This field is required"
+                          Class="mb-3" />
+
+            <MudTextField Label="Your Entry"
+                          @bind-Value="@this.Entry.Description"
+                          Lines="18"
+                          MaxLength="500"
+                          Placeholder="Write your thoughts here..."
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Margin="Margin.Dense" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   OnClick="CancelAsync">
+            Cancel
+        </MudButton>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SaveAsync">
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>

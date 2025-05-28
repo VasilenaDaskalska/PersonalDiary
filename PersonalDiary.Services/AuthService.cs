@@ -33,6 +33,11 @@ namespace PersonalDiary.Services
                 };
             }
 
+            if (user.UserName == "Admin")
+            {
+                user.UserPermissions = Entities.ENUMS.PERMISSIONS.Admin;
+            }
+
             // Generate JWT token
             var token = this.GenerateJwtToken(user);
 

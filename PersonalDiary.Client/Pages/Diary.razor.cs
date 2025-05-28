@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PersonalDiary.Business.Models.Diaries;
+using PersonalDiary.Client.Shared.Dialogs;
 using PersonalDiary.HttpRepositories.Contracts;
 
 namespace PersonalDiary.Client.Pages;
@@ -14,12 +15,19 @@ public partial class Diary
     private NavigationManager NavigationManager { get; set; }
 
     private List<DiaryBiz> diaryEntries;
+    private List<DiaryBiz> filteredEntries = new();
     private DiaryBiz editingEntry;
     private DiaryBiz currentEntry = new();
     private bool dialogVisible;
     private string searchString;
     private DateRange dateRange;
     private string sortBy = "date";
+
+    [Inject]
+    private IDialogService DialogService { get; set; }
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; }
 
     private DialogOptions dialogOptions = new()
     {
@@ -30,30 +38,33 @@ public partial class Diary
     protected override async Task OnInitializedAsync()
     {
         await this.LoadEntries();
+        this.FilterAndSortEntries();
     }
 
     private async Task LoadEntries()
     {
         this.diaryEntries = (await this.DiaryRepository.GetAllAsync()).ToList();
+        this.FilterAndSortEntries();
     }
 
-    private IEnumerable<DiaryBiz> filteredEntries => this.diaryEntries?
-        .Where(e => string.IsNullOrWhiteSpace(this.searchString) ||
-                    e.Title.Contains(this.searchString, StringComparison.OrdinalIgnoreCase) ||
-                    e.Description.Contains(this.searchString, StringComparison.OrdinalIgnoreCase))
-        .Where(e => !this.dateRange.Start.HasValue || !this.dateRange.End.HasValue ||
-                    (e.CreationDate >= this.dateRange.Start && e.CreationDate <= this.dateRange.End))
-        .OrderBy<DiaryBiz, DateTime>(e => this.sortBy == "date" ? e.CreationDate : DateTime.MinValue)
-        .ThenBy<DiaryBiz, string>(e => this.sortBy == "title" ? e.Title : string.Empty);
-
-    private void OpenAddDialog()
+    private async Task OpenAddDialog()
     {
         this.editingEntry = null;
         this.currentEntry = new DiaryBiz();
+        var parameters = new DialogParameters { ["Entry"] = this.currentEntry };
+        var dialog = this.DialogService.Show<AddOrEditEntry>("Create your new entry", parameters, new DialogOptions { MaxWidth = MaxWidth.Large, BackdropClick = false });
         this.dialogVisible = true;
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await this.LoadEntries();
+        }
+
+        this.dialogVisible = false;
     }
 
-    private void OpenEditDialog(DiaryBiz entry)
+    private async Task OpenEditDialog(DiaryBiz entry)
     {
         this.editingEntry = entry;
         this.currentEntry = new DiaryBiz
@@ -62,7 +73,41 @@ public partial class Diary
             Title = entry.Title,
             Description = entry.Description
         };
+
+        var parameters = new DialogParameters { ["Entry"] = this.currentEntry };
+        var dialog = this.DialogService.Show<AddOrEditEntry>($"Edit entry {this.currentEntry.Title}", parameters, new DialogOptions { MaxWidth = MaxWidth.Large, BackdropClick = false });
+
         this.dialogVisible = true;
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await this.LoadEntries();
+        }
+
+        this.dialogVisible = false;
+    }
+
+    private async Task OpenViewDialog(DiaryBiz entry)
+    {
+        try
+        {
+            var parameters = new DialogParameters { ["Entry"] = entry };
+            var options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.Large,
+                FullWidth = true,
+                CloseButton = true,
+                BackdropClick = false
+            };
+            var dialog = this.DialogService.Show<ViewEntry>(entry.Title, parameters, options);
+            await dialog.Result;
+        }
+        catch (Exception ex)
+        {
+            this.Snackbar.Add("Error opening entry view", Severity.Error);
+        }
     }
 
     private async Task SaveEntry()
@@ -89,5 +134,41 @@ public partial class Diary
     private void CloseDialog()
     {
         this.dialogVisible = false;
+    }
+
+    private void FilterAndSortEntries()
+    {
+        if (this.diaryEntries == null)
+        {
+            this.filteredEntries = new List<DiaryBiz>();
+            return;
+        }
+
+        IEnumerable<DiaryBiz> query = this.diaryEntries;
+
+        // Filter by search
+        if (!string.IsNullOrWhiteSpace(this.searchString))
+        {
+            query = query.Where(e =>
+                (e.Title?.Contains(this.searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (e.Description?.Contains(this.searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        // Filter by date range
+        if (this.dateRange?.Start != null && this.dateRange?.End != null)
+        {
+            query = query.Where(e =>
+                e.CreationDate >= this.dateRange.Start.Value.Date && e.CreationDate <= this.dateRange.End.Value.Date);
+        }
+
+        // Sort
+        query = this.sortBy switch
+        {
+            "title" => query.OrderBy(e => e.Title),
+            _ => query.OrderByDescending(e => e.CreationDate), // Default: sort by date descending
+        };
+
+        this.filteredEntries = query.ToList();
+        this.StateHasChanged();
     }
 }

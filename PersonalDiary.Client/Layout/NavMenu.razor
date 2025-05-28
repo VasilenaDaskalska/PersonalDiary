@@ -1,9 +1,14 @@
-﻿
+﻿@using PersonalDiary.Client.Shared.State
+
 <MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
     <MudNavLink Href="diary" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Book">My Diary</MudNavLink>
-    <MudNavLink Href="login" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
-    <MudNavLink Href="register" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
+    <MudNavLink Href="Profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">My Profile</MudNavLink>
+    <MudNavLink OnClick="@this.UserState.LogoutAsync" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Logout">Sign out</MudNavLink>
 </MudNavMenu>
 
 
+@code
+{
+    [Inject]
+    private UserState UserState { get; set; }
+}

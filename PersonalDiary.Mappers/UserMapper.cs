@@ -57,7 +57,7 @@ namespace PersonalDiary.Mappers
                 UserName = userBiz.UserName,
                 PhoneNumber = userBiz.PhoneNumber,
                 LastPasswordModifiedDate = userBiz.LastPasswordModifiedDate?.ToUniversalTime(),
-                UserPermissions = PERMISSIONS.User,
+                UserPermissions = userBiz.UserPermissions,
             };
         }
 

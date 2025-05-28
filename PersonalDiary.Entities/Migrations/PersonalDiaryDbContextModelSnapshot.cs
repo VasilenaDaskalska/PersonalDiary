@@ -57,7 +57,7 @@ namespace PersonalDiary.Entities.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Diaries");
+                    b.ToTable("Diaries", (string)null);
                 });
 
             modelBuilder.Entity("PersonalDiary.Entities.User", b =>
@@ -115,7 +115,7 @@ namespace PersonalDiary.Entities.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 #pragma warning restore 612, 618
         }
