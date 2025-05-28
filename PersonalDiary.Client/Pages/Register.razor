@@ -1,0 +1,62 @@
+@page "/register"
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Register</MudText>
+        <MudForm @ref="form" @bind-IsValid="@success">
+
+            <MudTextField @bind-Value="@this.registerModel.Name"
+                          Label="Fill name"
+                          Required="true"
+                          RequiredError="Name is required!"
+                          Class="mt-3" />
+
+            <MudTextField @bind-Value="@this.registerModel.UserName"
+                          Label="Username"
+                          Required="true"
+                          RequiredError="Username is required!"
+                          Class="mt-3" />
+
+            <MudTextField @bind-Value="@this.registerModel.Email"
+                          Label="Email"
+                          Required="true"
+                          RequiredError="Email is required!"
+                          Validation="@(new EmailAddressAttribute() {ErrorMessage = "Invalid email format"})"
+                          Class="mt-3" />
+
+            <MudTextField @bind-Value="@this.registerModel.PhoneNumber"
+                          Label="Phone number"
+                          Required="true"
+                          RequiredError="Email is required!"
+                          Validation="@(new PhoneAttribute() { ErrorMessage = "Please enter correct phone number!"})"
+                          Class="mt-3" />
+
+            <MudTextField @bind-Value="@this.registerModel.Password"
+                          Label="Password"
+                          Required="true"
+                          Validation="@this.ValidatePassword"
+                          RequiredError="Password is required!"
+                          InputType="InputType.Password"
+                          Class="mt-3" />
+
+            <MudTextField @bind-Value="@this.confirmPassword"
+                          Label="Confirm Password"
+                          Required="true"
+                          RequiredError="Please confirm your password!"
+                          InputType="InputType.Password"
+                          Class="mt-3" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Class="mt-4"
+                       OnClick="HandleRegister"
+                       Disabled="@(!success)">
+                Register
+            </MudButton>
+            <MudText Align="Align.Center" Class="mt-4">
+                Already have an account? <MudLink Href="/login">Login here</MudLink>
+            </MudText>
+        </MudForm>
+    </MudPaper>
+</MudContainer>

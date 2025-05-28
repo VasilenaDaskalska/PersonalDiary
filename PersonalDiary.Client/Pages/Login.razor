@@ -1,0 +1,31 @@
+@page "/login"
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Login</MudText>
+        <MudForm @ref="form" @bind-IsValid="@success">
+            <MudTextField @bind-Value="loginModel.Username" 
+                         Label="Username" 
+                         Required="true" 
+                         RequiredError="Username is required!"
+                         Class="mt-3"/>
+            <MudTextField @bind-Value="loginModel.Password" 
+                         Label="Password" 
+                         Required="true" 
+                         RequiredError="Password is required!"
+                         InputType="InputType.Password" 
+                         Class="mt-3"/>
+            <MudButton Variant="Variant.Filled" 
+                      Color="Color.Primary" 
+                      FullWidth="true" 
+                      Class="mt-4"
+                      OnClick="HandleLogin"
+                      Disabled="@(!success)">
+                Login
+            </MudButton>
+            <MudText Align="Align.Center" Class="mt-4">
+                Don't have an account? <MudLink Href="/register">Register here</MudLink>
+            </MudText>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
