@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using PersonalDiary.Business.Models.Diaries;
 using PersonalDiary.Client.Shared.Dialogs;
+using PersonalDiary.Client.Shared.State;
 using PersonalDiary.HttpRepositories.Contracts;
 
 namespace PersonalDiary.Client.Pages;
@@ -29,6 +30,9 @@ public partial class Diary
     [Inject]
     private ISnackbar Snackbar { get; set; }
 
+    [Inject]
+    private UserState UserState { get; set; }
+
     private DialogOptions dialogOptions = new()
     {
         MaxWidth = MaxWidth.Small,
@@ -43,7 +47,7 @@ public partial class Diary
 
     private async Task LoadEntries()
     {
-        this.diaryEntries = (await this.DiaryRepository.GetAllAsync()).ToList();
+        this.diaryEntries = (await this.DiaryRepository.GetAllAsync()).Where(x => x.UserCreatorID == this.UserState.CurrentUser?.ID).ToList();
         this.FilterAndSortEntries();
     }
 
